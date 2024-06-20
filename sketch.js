@@ -16,7 +16,8 @@ var inimigo2, inimigoImg, inimigoImgLf, deadEnemy;
 
 var trofeu, trofeuImg, win, winImg
 
-
+var soundWin 
+var soundLose
 //função para carregar imagenbs e animações
 function preload() {
   groundimg = loadImage("src/platform.png")
@@ -30,6 +31,8 @@ function preload() {
   gameOverImg = loadImage("./src/gameOver.png");
   trofeuImg = loadImage("./src/trofeu.png");
   winImg = loadImage("./src/winner.png");
+  soundWin  = loadSound("WinSound.wav");
+  soundLose = loadSound("loseSound.wav")
   
 }
 
@@ -121,11 +124,13 @@ function setup() {
   //trofeu
   trofeu = createSprite(5400, 290)
   trofeu.addImage(trofeuImg);
+  trofeu.setCollider("rectangle",0,0, 80, 100)
   trofeu.scale =0.2
 
-  win =createSprite(width/2 -300, height/2 -100, 800,400);
-  win.addImage(winImg);
-  win.visible = false;
+
+ win = createSprite(5500, height/2 -100, 800,400);
+ win.addImage(winImg);
+ win.visible = false;
 
 
 
@@ -139,7 +144,8 @@ function draw() {
   background("lightblue");
   camera.position.x = astronaut.x
   astronaut.velocityY = astronaut.velocityY + 5
- //console.log(astronaut.y)
+  console.log(astronaut.y)
+
 
   //adicionando edição e modificação de texto
   textSize(30);
@@ -152,6 +158,7 @@ function draw() {
 
    
    gameOver.visible = false;
+  // win.visible = false;
 
   if (keyDown("right")) {
     GameState = 1;
@@ -159,6 +166,7 @@ function draw() {
   }
 
   if (GameState == 1) {
+   // win.visible = false;
     if (keyDown("right")) {
       astronaut.changeAnimation("run", run)
       astronaut.x = astronaut.x + 10
@@ -198,7 +206,7 @@ function draw() {
     EnemyDead();
     dano();
     
-
+   // win.visible = false;
     //comportancia do inimigo
     if (inimigo.x > 1580) {
       inimigo.velocityX = -5
@@ -231,20 +239,28 @@ function draw() {
       camera.position.x = width/2;
       GameState = 2;
     }
-
+   
 
     
     if(astronaut.isTouching(trofeu)){
-      GameState = 3;
+     // camera.position.x = width/2;
+      GameState =3;
+      //OPERADOR LÓGICO DE NEGAÇÃO !, PARA O SOM TOCAR UMA VEZ
+      if(!soundWin.isPlaying()){
+        soundWin.play()
+      }
 
     }
-
-   
+  
+  }
+  if(GameState ==3){
+    camera.position.x = width/2;
+    gameWin();
   }
 
   //definindo fim de jogo
   if(GameState == 2){
-    astronaut.destroy();
+   astronaut.destroy();
     textFont("courier New");
     textSize(40);
     strokeWeight(10);
@@ -253,13 +269,12 @@ function draw() {
     text("GAME OVER!", width/2 -400, height/2 +100, 800,400);
 
     gameOver.visible = true;
+    win.visible = false;
+    if(!soundLose.isPlaying()){
+      soundLose.play();
+    }
 
     
-  }
-
-  //compelte game
-  if(GameState = 3) {
-
   }
 
 
@@ -284,7 +299,7 @@ function astronaut_jump() {
   if (mouseDown("leftButton")) {
     astronaut.velocityY = astronaut.velocityY - 60
     astronaut.x = astronaut.x + 50
-
+   
   }
 }
 
@@ -319,5 +334,26 @@ function dano() {
     astronaut.x = 400
     vida = vida -1
   }
+  if (astronaut.y > 900) {
+    vida = vida -1
+    astronaut.x = 400;
+    astronaut.y = 200;
+    
+  }
+
+ 
 }
 
+function gameWin(){
+  
+  win.visible = true;
+  textFont("courier New");
+  textSize(40);
+  strokeWeight(10);
+  stroke("#2d126b");
+  fill("#dbb623")
+  text("you win!", width/2 -400, height/2 +100, 800,400);
+
+
+  astronaut.destroy();
+}
